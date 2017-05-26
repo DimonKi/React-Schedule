@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/component.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <title>Project</title>
+<head>
+</head>
+<body>
+
+    <div id="app">
+      <div id="mp-pusher" class="mp-pusher">
+        <component-menu></component-menu>
+        <component-schedule></component-schedule>
+      </div>
+    </div>
+
+    <script src="js/moment.js"></script>
+    <script src="js/modernizer.js"></script>
+    <script src="js/bundle.js"></script>
+    <script>
+    function codeLatLng(lat, lng) {
+      const latlng = new google.maps.LatLng(lat, lng);
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({
+        'latLng': latlng
+      }, function (results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          if (results[1]) {
+            document.getElementById('place-output').textContent = results[1].formatted_address;
+          } else {
+            alert('Не удалось определить местоположение автоматически, введите свой адрес');
+          }
+        } else {
+          alert('Geocoder failed due to: ' + status);
+        }
+      });
+    }
+
+    function initAutocomplete() {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          window.currentLocation = position.coords.latitude + ', ' + position.coords.longitude;
+          codeLatLng(position.coords.latitude, position.coords.longitude)
+        },
+        function (error) {
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: Infinity,
+          maximumAge: 0
+        }
+      );
+
+      const output = document.getElementById('place-output');
+      const input = document.getElementById('place-input');
+      const searchBox = new google.maps.places.SearchBox(input);
+
+      searchBox.addListener('places_changed', function () {
+        const places = searchBox.getPlaces();
+        output.textContent = places[0].formatted_address;
+
+        window.currentLocation = places[0].geometry.location.lat() + ', ' + places[0].geometry.location.lng();
+
+        if (places.length === 0) {
+          return
+        }
+      });
+    }
+    </script>
+    
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4Evx82-KoarUlnkMY-IEWIYh2ZsEm8EA&libraries=places&callback=initAutocomplete"></script>
+</body>
+</html>
